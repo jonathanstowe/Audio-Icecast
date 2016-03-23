@@ -1,4 +1,23 @@
-use v6;
+use v6.c;
+
+=begin pod
+
+=head1 NAME
+
+Audio::Icecast - adminstrative interface to icecast
+
+=head1 SYNOPSIS
+
+=begin code
+
+=end code
+
+=head1 DESCRIPTION
+
+
+
+=end pod
+
 
 use XML::Class;
 use HTTP::UserAgent;
@@ -55,6 +74,21 @@ class Audio::Icecast {
         has Int $.stats is xml-element;
         has Int $.stats-connections is xml-element('stats_connections');
         has Source @.source;
+    }
+
+    class Listeners does XML::Class[xml-element => 'icestats'] {
+        class Listener does XML::Class[xml-element => 'listener'] {
+            has Str      $.ip           is xml-element('IP');
+            has Str      $.user-agent   is xml-element('UserAgent');
+            has Duration $.connected    is xml-element('Connected') is xml-deserialise(sub (Str $v --> Duration) { Duration.new($v) });
+            has Str      $.id           is xml-element('ID');
+        }
+        class Source does XML::Class[xml-element => 'source'] {
+            has Str         $.mount;
+            has Int         $.number-of-listeners   is xml-element('Listeners');
+            has Listener    @.listeners;
+        }
+        has Source $.source is xml-element handles <listeners>;
     }
 
     class UserAgent is HTTP::UserAgent {
@@ -114,6 +148,100 @@ class Audio::Icecast {
         my $resp = self.get(path => <admin stats>);
         if $resp.is-success {
             $resp.from-xml(Stats);
+        }
+    }
+
+    proto method listeners(|c) { * }
+
+    multi method listeners(Source $source) {
+        samewith $source.mount;
+    }
+
+    multi method listeners(Str $mount) {
+        my $resp = self.get(path => <admin listclients>, :$mount);
+        if $resp.is-success {
+            my $l = $resp.from-xml(Listeners);
+            $l.listeners; 
+        }
+    }
+
+    proto method update-metadata(|c) { * }
+
+    multi method update-metadata(Source $source, Str $meta) {
+        samewith $source.mount, $meta;
+    }
+
+    multi method update-metadata(Str $mount, Str $song) {
+        my $resp = self.get(path => <admin metadata>, :$mount, :$song, mode => 'updinfo');
+        if $resp.is-success {
+            True;
+        }
+        else {
+            False;
+        }
+    }
+
+    proto method set-fallback(|c) { * }
+
+    multi method set-fallback(Source $source, Source $fallback) {
+        samewith $source.mount, $fallback.mount;
+    }
+
+    multi method set-fallback(Str $mount, Str $fallback) {
+        my $resp = self.get(path => <admin fallbacks>, :$mount, :$fallback);
+        if $resp.is-success {
+            True;
+        }
+        else {
+            False;
+        }
+    }
+
+    proto method move-clients(|c) { * }
+
+    multi method move-clients(Source $source, Source $destination) {
+        samewith $source.mount, $destination.mount;
+    }
+
+    multi method move-clients(Str $mount, Str $destination) {
+        my $resp = self.get(path => <admin moveclients>, :$mount, :$destination);
+        if $resp.is-success {
+            True;
+        }
+        else {
+            False;
+        }
+    }
+
+    proto method kill-client(|c) { * }
+
+    multi method kill-client(Source $source, Listener $client) {
+        samewith $source.mount, $client.id;
+    }
+
+    multi method kill-client(Str $mount, Str() $id) {
+        my $resp = self.get(path => <admin killclient>, :$mount, :$id);
+        if $resp.is-success {
+            True;
+        }
+        else {
+            False;
+        }
+    }
+
+    proto method kill-source(|c) { * }
+
+    multi method kill-source(Source $source) {
+        samewith $source.mount;
+    }
+
+    multi method kill-source(Str $mount) {
+        my $resp = self.get(path => <admin killsource>, :$mount);
+        if $resp.is-success {
+            True;
+        }
+        else {
+            False;
         }
     }
 }
