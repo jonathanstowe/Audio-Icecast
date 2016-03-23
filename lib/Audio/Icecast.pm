@@ -158,7 +158,7 @@ class Audio::Icecast {
     }
 
     multi method listeners(Str $mount) {
-        my $resp = self.get(path => <admin listclients>, :$mount);
+        my $resp = self.get(path => <admin listclients>, params => %(:$mount));
         if $resp.is-success {
             my $l = $resp.from-xml(Listeners);
             $l.listeners; 
@@ -172,7 +172,7 @@ class Audio::Icecast {
     }
 
     multi method update-metadata(Str $mount, Str $song) {
-        my $resp = self.get(path => <admin metadata>, :$mount, :$song, mode => 'updinfo');
+        my $resp = self.get(path => <admin metadata>, params => %(:$mount, :$song, mode => 'updinfo'));
         if $resp.is-success {
             True;
         }
@@ -188,7 +188,7 @@ class Audio::Icecast {
     }
 
     multi method set-fallback(Str $mount, Str $fallback) {
-        my $resp = self.get(path => <admin fallbacks>, :$mount, :$fallback);
+        my $resp = self.get(path => <admin fallbacks>, params => %(:$mount, :$fallback));
         if $resp.is-success {
             True;
         }
@@ -204,7 +204,7 @@ class Audio::Icecast {
     }
 
     multi method move-clients(Str $mount, Str $destination) {
-        my $resp = self.get(path => <admin moveclients>, :$mount, :$destination);
+        my $resp = self.get(path => <admin moveclients>, params => %(:$mount, :$destination));
         if $resp.is-success {
             True;
         }
@@ -215,12 +215,12 @@ class Audio::Icecast {
 
     proto method kill-client(|c) { * }
 
-    multi method kill-client(Source $source, Listener $client) {
+    multi method kill-client(Source $source, Listeners::Listener $client) {
         samewith $source.mount, $client.id;
     }
 
     multi method kill-client(Str $mount, Str() $id) {
-        my $resp = self.get(path => <admin killclient>, :$mount, :$id);
+        my $resp = self.get(path => <admin killclient>, params => %(:$mount, :$id));
         if $resp.is-success {
             True;
         }
@@ -236,7 +236,7 @@ class Audio::Icecast {
     }
 
     multi method kill-source(Str $mount) {
-        my $resp = self.get(path => <admin killsource>, :$mount);
+        my $resp = self.get(path => <admin killsource>, params => %(:$mount));
         if $resp.is-success {
             True;
         }
