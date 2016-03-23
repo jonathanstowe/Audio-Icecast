@@ -1,7 +1,8 @@
 use v6;
 
 use XML::Class;
-use DateTime::Format;
+use HTTP::UserAgent;
+use URI::Template;
 
 class Audio::Icecast {
     class Source does XML::Class[xml-element => 'source'] {
@@ -54,6 +55,66 @@ class Audio::Icecast {
         has Int $.stats is xml-element;
         has Int $.stats-connections is xml-element('stats_connections');
         has Source @.source;
+    }
+
+    class UserAgent is HTTP::UserAgent {
+        use HTTP::Request::Common;
+        role Response {
+            method is-xml() returns Bool {
+                if self.content-type eq 'text/xml' {
+                    True;
+                }
+                else {
+                    False;
+                }
+
+            }
+
+            method from-xml(XML::Class:U $c) returns XML::Class {
+                $c.from-xml(self.content);
+            }
+
+        }
+
+        has Str             $.base-url;
+        has URI::Template   $.base-template;
+
+        has Bool            $.secure    =   False;
+        has Str             $.host      =   'localhost';
+        has Int             $.port      =   8000;
+        has                 %.default-headers   = (Accept => "text/xml", Content-Type => "text/xml");
+
+        method base-url() returns Str {
+            if not $!base-url.defined {
+                $!base-url = 'http' ~ ($!secure ?? 's' !! '') ~ '://' ~ $!host ~ ':' ~ $!port.Str ~ '{/path*}{?params*}';
+            }
+            $!base-url;
+        }
+
+        method base-template() returns URI::Template handles <process> {
+            if not $!base-template.defined {
+                $!base-template = URI::Template.new(template => self.base-url);
+            }
+            $!base-template;
+        }
+
+        method get(:$path, :$params, *%headers) returns Response {
+            self.request(GET(self.process(:$path, :$params), |%!default-headers, |%headers)) but Response;
+        }
+    }
+
+    submethod BUILD(Str :$host = 'localhost', Int :$port = 8000, Bool :$secure = False, Str :$user = 'admin', Str :$password = 'hackme') {
+        $!ua = UserAgent.new(:$host, :$port, :$secure);
+        $!ua.auth($user, $password);
+    }
+
+    has UserAgent $.ua handles <get>;
+
+    method stats() returns Stats {
+        my $resp = self.get(path => <admin stats>);
+        if $resp.is-success {
+            $resp.from-xml(Stats);
+        }
     }
 }
 # vim: expandtab shiftwidth=4 ft=perl6
