@@ -14,6 +14,219 @@ Audio::Icecast - adminstrative interface to icecast
 
 =head1 DESCRIPTION
 
+This provides an interface to the admin API of a running 
+L<icecast|http://www.icecast.org> audio streaming server.
+
+The API itself is quite thin as the icecast server doesn't
+do much more than stream audio from a source quite efficiently.
+
+Some features such as static mounts and alternative authentication
+mechanisms can only be enabled via the configuration file and
+not dynamically, if you want more control over the streams at
+runtime then you might consider using a streaming middleware
+such as L<liquidsoap|http://liquidsoap.fm/> in conjunction with
+your icecast server.
+
+=head1 METHODS
+
+Where given as a string below a mount name must be given as found in the
+C<mount> attribute of L<Audio::Icecast::Source|#Audio::Icecast::Source>,
+that is prefixed with a '/' (e.g. '/mount'.)
+
+=head2 method new
+
+    method new(Str :$host = 'localhost', Int :$port = 8000, Bool :$secure = False, Str :$user = 'admin', Str :$password = 'hackme')
+
+The constructor for the class supplies defaults that will work with a
+stock configuration on the local machine, this probably isn't what you
+want, because at the very least you changed the password right? If you
+are unsure of the appropriate values then you may need to look at the
+C<icecast.xml> which will typically be in C</etc> or C</usr/local/etc>.
+
+The C<:secure> flag is provided to allow an https connection to the
+server but I am not actually aware of any possible configuration of
+icecast which make this necessary.
+
+=head2 method stats
+
+    method stats() returns Stats
+
+This returns a L<Audio::Icecast::Stats|#Audio::Icecast::Stats> object
+that reflects the current statistics for the icecast server.
+
+=head2 method listeners
+
+    multi method listeners(Source $source)
+    multi method listeners(Str $mount)
+
+This returns a list of
+L<Audio::Icecast::Listener|#Audio::Icecast::Listener>
+objects reflecting the listeners of the supplied
+mount, which can be supplied as either a string or a
+L<Audio::Icecast::Source|#Audio::Icecast::Source> object.
+
+=head2 method update-metadata
+
+    multi method update-metadata(Source $source, Str $meta)
+    multi method update-metadata(Str $mount, Str $meta)
+
+This updates the stream metadata for the supplied mount which can either
+be supplied as a L<Audio::Icecast::Source|#Audio::Icecast::Source>
+object or a string.
+
+=head2 method set-fallback
+
+    multi method set-fallback(Source $source, Source $fallback)
+    multi method set-fallback(Str $mount, Str $fallback)
+
+This sets a fallback on the specified mount to another mount,
+that is if the source for the mount disconnects then the
+clients will be moved automatically to the fallback mount.
+The source and fallback can be supplied as strings or
+L<Audio::Icecast::Source|#Audio::Icecast::Source> objects.
+
+=head2 method move-clients
+
+    multi method move-clients(Source $source, Source $destination)
+    multi method move-clients(Str $mount, Str $destination)
+
+This will move the clients connected to the supplied mount
+to a different one, which must have an active source. Both
+source and destination can be supplied as strings or  as
+L<Audio::Icecast::Source|#Audio::Icecast::Source> objects.
+
+=head2 method kill-client
+
+    multi method kill-client(Source $source, Listener $client)
+    multi method kill-client(Str $mount, Str() $id)
+
+This disconnects the client which can either be specified as a
+L<Audio::Icecast::Listener|#Audio::Icecast::Listener> object or a string
+ID, on the supplied mount.
+
+=head2 method kill-source
+
+    multi method kill-source(Source $source)
+    multi method kill-source(Str $mount)
+
+This disconnects the source client supplying the specified mount,
+the mount can be supplied as the string name of the mount or as a
+L<Audio::Icecast::Source|#Audio::Icecast::Source> object.
+
+=head1 Audio::Icecast::Stats
+
+Objects of this type represent the statistics for the running
+icecast server, some of the attributes are derived directly
+from the configuration file of the server and won't change.
+
+=head2 mount
+
+This is the name of the "mount", it will always be prefixed with
+a '/', this is the local part of the URL on which listeners will
+be able to connect to the resulting stream.
+
+=head2 audio-info
+
+This is a string describing the properties of the stream, 
+comprised of C<bitrate>, C<channels> and C<samplerate>
+
+=head2 bitrate
+
+The streaming bitrate of the stream in Kilobits per second.
+
+=head2 channels
+
+The number of audio channels in the stream, this should only
+over be 1 or two.
+
+=head2 genre
+
+The text genre as supplied by the source client.
+
+=head2 listener-peak
+
+The maximum number of concurrent listeners of the stream since
+it was started.
+
+=head2 listeners
+
+The current number of connected listeners.
+
+=head2 listen-url
+
+This is the public URL of the stream, derived from the configured
+host name of the server and the mount name.
+
+=head2 max-listeners
+
+This is the maximum permitted number of concurrent listeners
+allowed on the stream, if it is "unlimited" it will be a very
+big number (beyond the capability of icecast to serve.)
+
+=head2 public
+
+A boolean indicating whether the stream should be shown in a
+directory of streams.  This is typically supplied by the
+source client.
+
+=head2 samplerate
+
+This is the samplerate derived from the source stream.  It
+is expressed in "frames per second", e.g. 44100
+
+=head2 server-description
+
+A description of the stream which will typically be supplied
+by the source client.
+
+=head2 server-name
+
+The "name" of the stream which will typically be supplied
+by the source client.
+
+=head2 server-type
+
+The media type of the stream as inferred from the source
+stream, e.g. "audio/mpeg", "audio/aac".
+
+=head2 slow-listeners
+
+The number of listeners on the stream that are determined
+to be "slow", that is to say they are being sent data that
+is more than a single buffer behind what the source has 
+sent. This may have an impact when the stream is shut down
+or the client moved to another mount.
+
+=head2 source-ip
+
+This is the peer address of the source client.
+
+=head2 stream-start
+
+This is the datetime at which the source started, usually
+the point when the source client connected, however it
+may be different for a "static" mount defined in the
+icecast config.
+
+=head2 total-bytes-read
+
+The total number of bytes received from the source client.
+
+=head2 total-bytes-sent
+
+The total number of bytes sent to the listeners of this
+mount.
+
+=head2 user-agent
+
+The User-Agent header provided by the source client.
+
+=head1 Audio::Icecast::Listener
+
+This describes a consumer of a stream.
+
+
+
 
 
 =end pod
@@ -56,7 +269,7 @@ class Audio::Icecast {
         has Str  $.user-agent is xml-element('user_agent');
     }
     class Stats does XML::Class[xml-element => 'icestats'] {
-        has Str $.admin is xml-element;
+        has Str $.admin-email is xml-element('admin');
         has Int $.clients is xml-element;
         has Int $.connections is xml-element;
         has Int $.file-connections is xml-element('file_connections');
@@ -76,13 +289,13 @@ class Audio::Icecast {
         has Source @.source;
     }
 
+    class Listener does XML::Class[xml-element => 'listener'] {
+        has Str      $.ip           is xml-element('IP');
+        has Str      $.user-agent   is xml-element('UserAgent');
+        has Duration $.connected    is xml-element('Connected') is xml-deserialise(sub (Str $v --> Duration) { Duration.new($v) });
+        has Str      $.id           is xml-element('ID');
+    }
     class Listeners does XML::Class[xml-element => 'icestats'] {
-        class Listener does XML::Class[xml-element => 'listener'] {
-            has Str      $.ip           is xml-element('IP');
-            has Str      $.user-agent   is xml-element('UserAgent');
-            has Duration $.connected    is xml-element('Connected') is xml-deserialise(sub (Str $v --> Duration) { Duration.new($v) });
-            has Str      $.id           is xml-element('ID');
-        }
         class Source does XML::Class[xml-element => 'source'] {
             has Str         $.mount;
             has Int         $.number-of-listeners   is xml-element('Listeners');
@@ -215,7 +428,7 @@ class Audio::Icecast {
 
     proto method kill-client(|c) { * }
 
-    multi method kill-client(Source $source, Listeners::Listener $client) {
+    multi method kill-client(Source $source, Listener $client) {
         samewith $source.mount, $client.id;
     }
 
