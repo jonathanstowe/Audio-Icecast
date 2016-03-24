@@ -225,9 +225,23 @@ The User-Agent header provided by the source client.
 
 This describes a consumer of a stream.
 
+=head2 id
 
+This is icecast's internal identifier for the client connection.
+It is the value required by C<kill-client>. 
 
+=head2 ip
 
+The peer address of the client.
+
+=head2 user-agent
+
+The "User-Agent" header presented by the client software.
+
+=head2 connected
+
+A Duration object representing the number of seconds the client
+has been connected.
 
 =end pod
 
