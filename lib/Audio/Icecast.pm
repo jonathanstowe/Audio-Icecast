@@ -10,7 +10,22 @@ Audio::Icecast - adminstrative interface to icecast
 
 =begin code
 
+use Audio::Icecast;
+
+# Using the default configuration
+
+my $icecast = Audio::Icecast.new;
+
+for $icecast.stats.source -> $source {
+    say "listeners for { $source.mount }";
+    for $icecast.listeners($source) -> $listener {
+        say "\t",$listener.ip;
+    }
+}
+
 =end code
+
+See also the the C<example> directory.
 
 =head1 DESCRIPTION
 
@@ -26,6 +41,10 @@ not dynamically, if you want more control over the streams at
 runtime then you might consider using a streaming middleware
 such as L<liquidsoap|http://liquidsoap.fm/> in conjunction with
 your icecast server.
+
+You probably should at least familiarise yourself with the
+L<icecast docummentation|http://www.icecast.org/docs/icecast-2.4.1/>
+before making serious use of this module.
 
 =head1 METHODS
 
