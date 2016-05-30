@@ -63,7 +63,7 @@ Anyhow if you have any suggestions or feedback feel free to post them
 at https://github.com/jonathanstowe/Audio-Icecast/issues or even better
 send a pull request.
 
-## License and copyright
+## Licence and copyright
 
 This is free software, please see the LICENCE file in the distribution.
 
