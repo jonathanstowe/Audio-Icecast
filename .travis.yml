@@ -7,6 +7,7 @@ perl6:
 
 install:
     - sudo apt-get install icecast2
+    - sudo sed -i -e 's/ENABLE=false/ENABLE=true/' /etc/default/icecast2
     - sudo service icecast2 start
     - rakudobrew build-panda
     - panda installdeps .
