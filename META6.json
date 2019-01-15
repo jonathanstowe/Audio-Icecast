@@ -1,17 +1,18 @@
 {
   "name": "Audio::Icecast",
-  "source-url": "git@github.com:jonathanstowe/Audio-Icecast.git",
+  "version": "0.0.2",
+  "auth": "github:jonathanstowe",
+  "api": "1.0",
+  "description": "Administrative helpers for an icecast server",
+  "source-url": "git://github.com/jonathanstowe/Audio-Icecast.git",
   "support": {
-    "source": "git@github.com:jonathanstowe/Audio-Icecast.git"
+    "source": "git://github.com/jonathanstowe/Audio-Icecast.git"
   },
-  "perl": "6.c",
+  "perl": "6.*",
   "resources": [
-    
   ],
   "build-depends": [
-    
   ],
-  "auth": "github:jonathanstowe",
   "depends": [
     "XML::Class",
     "URI::Template",
@@ -31,10 +32,8 @@
   "provides": {
     "Audio::Icecast": "lib/Audio/Icecast.pm"
   },
-  "version": "0.0.2",
   "authors": [
     "Jonathan Stowe <jns+gh@gellyfish.co.uk>"
   ],
-  "description": "Administrative helpers for an icecast server",
-  "meta6": "0"
+  "meta-version": "0"
 }
