@@ -5,9 +5,9 @@ use v6;
 use Test;
 use Audio::Icecast;
 
-my $data-dir = $*PROGRAM.parent.child('data');
+my $data-dir = $*PROGRAM.parent.add('data');
 
-my $xml = $data-dir.child('admin_listeners.xml').slurp;
+my $xml = $data-dir.add('admin_listeners.xml').slurp;
 
 my $obj;
 
