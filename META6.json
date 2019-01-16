@@ -1,6 +1,6 @@
 {
   "name": "Audio::Icecast",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "auth": "github:jonathanstowe",
   "api": "1.0",
   "description": "Administrative helpers for an icecast server",

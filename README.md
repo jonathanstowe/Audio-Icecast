@@ -66,5 +66,5 @@ send a pull request.
 
 This is free software, please see the [LICENCE](LICENCE) file in the distribution.
 
-© Jonathan Stowe 2016, 2017
+© Jonathan Stowe 2016, 2017, 2019
 
