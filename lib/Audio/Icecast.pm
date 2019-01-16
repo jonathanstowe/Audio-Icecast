@@ -279,7 +279,7 @@ class Audio::Icecast {
         has Int $.listener-peak is xml-element('listener_peak');
         has Int $.listeners is xml-element;
         has Str $.listen-url is xml-element('listenurl');
-        sub ml-in(Str $v) returns Int {
+        sub ml-in(Str $v --> Int ) {
             if $v eq 'unlimited' {
                 int.Range.max;
             }
@@ -340,17 +340,11 @@ class Audio::Icecast {
     class UserAgent is HTTP::UserAgent {
         use HTTP::Request::Common;
         role Response {
-            method is-xml() returns Bool {
-                if self.content-type eq 'text/xml' {
-                    True;
-                }
-                else {
-                    False;
-                }
-
+            method is-xml( --> Bool ) {
+                self.content-type eq 'text/xml'
             }
 
-            method from-xml(XML::Class:U $c) returns XML::Class {
+            method from-xml(XML::Class:U $c --> XML::Class ) {
                 $c.from-xml(self.content);
             }
 
@@ -364,21 +358,20 @@ class Audio::Icecast {
         has Int             $.port      =   8000;
         has                 %.default-headers   = (Accept => "text/xml", Content-Type => "text/xml");
 
-        method base-url() returns Str {
+        method base-url( --> Str ) {
             if not $!base-url.defined {
                 $!base-url = 'http' ~ ($!secure ?? 's' !! '') ~ '://' ~ $!host ~ ':' ~ $!port.Str ~ '{/path*}{?params*}';
             }
             $!base-url;
         }
 
-        method base-template() returns URI::Template handles <process> {
-            if not $!base-template.defined {
-                $!base-template = URI::Template.new(template => self.base-url);
+        method base-template( --> URI::Template ) handles <process> {
+            $!base-template //= do {
+                URI::Template.new(template => self.base-url);
             }
-            $!base-template;
         }
 
-        method get(:$path, :$params, *%headers) returns Response {
+        method get(:$path, :$params, *%headers --> Response ) {
             self.request(GET(self.process(:$path, :$params), |%!default-headers, |%headers)) but Response;
         }
     }
@@ -390,7 +383,7 @@ class Audio::Icecast {
 
     has UserAgent $.ua handles <get>;
 
-    method stats() returns Stats {
+    method stats( --> Stats ) {
         my $resp = self.get(path => <admin stats>);
         if $resp.is-success {
             $resp.from-xml(Stats);
@@ -413,82 +406,52 @@ class Audio::Icecast {
 
     proto method update-metadata(|c) { * }
 
-    multi method update-metadata(Source $source, Str $meta) {
+    multi method update-metadata(Source $source, Str $meta --> Bool ) {
         self.update-metadata($source.mount, $meta);
     }
 
-    multi method update-metadata(Str $mount, Str $song) {
-        my $resp = self.get(path => <admin metadata>, params => %(:$mount, :$song, mode => 'updinfo'));
-        if $resp.is-success {
-            True;
-        }
-        else {
-            False;
-        }
+    multi method update-metadata(Str $mount, Str $song --> Bool ) {
+        self.get(path => <admin metadata>, params => %(:$mount, :$song, mode => 'updinfo')).is-success;
     }
 
     proto method set-fallback(|c) { * }
 
-    multi method set-fallback(Source $source, Source $fallback) {
+    multi method set-fallback(Source $source, Source $fallback --> Bool ) {
         self.set-fallback($source.mount, $fallback.mount);
     }
 
-    multi method set-fallback(Str $mount, Str $fallback) {
-        my $resp = self.get(path => <admin fallbacks>, params => %(:$mount, :$fallback));
-        if $resp.is-success {
-            True;
-        }
-        else {
-            False;
-        }
+    multi method set-fallback(Str $mount, Str $fallback --> Bool ) {
+        self.get(path => <admin fallbacks>, params => %(:$mount, :$fallback)).is-success;
     }
 
     proto method move-clients(|c) { * }
 
-    multi method move-clients(Source $source, Source $destination) {
+    multi method move-clients(Source $source, Source $destination --> Bool ) {
         self.move-clients($source.mount, $destination.mount);
     }
 
-    multi method move-clients(Str $mount, Str $destination) {
-        my $resp = self.get(path => <admin moveclients>, params => %(:$mount, :$destination));
-        if $resp.is-success {
-            True;
-        }
-        else {
-            False;
-        }
+    multi method move-clients(Str $mount, Str $destination --> Bool ) {
+        self.get(path => <admin moveclients>, params => %(:$mount, :$destination)).is-success;
     }
 
     proto method kill-client(|c) { * }
 
-    multi method kill-client(Source $source, Listener $client) {
+    multi method kill-client(Source $source, Listener $client --> Bool ) {
         self.kill-client( $source.mount, $client.id);
     }
 
-    multi method kill-client(Str $mount, Str() $id) {
-        my $resp = self.get(path => <admin killclient>, params => %(:$mount, :$id));
-        if $resp.is-success {
-            True;
-        }
-        else {
-            False;
-        }
+    multi method kill-client(Str $mount, Str() $id --> Bool ) {
+        self.get(path => <admin killclient>, params => %(:$mount, :$id)).is-success;
     }
 
     proto method kill-source(|c) { * }
 
-    multi method kill-source(Source $source) {
+    multi method kill-source(Source $source --> Bool ) {
         self.kill-source($source.mount);
     }
 
-    multi method kill-source(Str $mount) {
-        my $resp = self.get(path => <admin killsource>, params => %(:$mount));
-        if $resp.is-success {
-            True;
-        }
-        else {
-            False;
-        }
+    multi method kill-source(Str $mount --> Bool ) {
+        self.get(path => <admin killsource>, params => %(:$mount)).is-success;
     }
 }
 # vim: expandtab shiftwidth=4 ft=perl6
