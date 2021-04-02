@@ -1,4 +1,4 @@
-#!perl6
+#!raku
 
 use v6;
 
@@ -10,4 +10,4 @@ sub MAIN(Str :$mount!, Str :$title!, Str :$host = 'localhost', Int :$port = 8000
 
 
 }
-# vim: expandtab shiftwidth=4 ft=perl6
+# vim: expandtab shiftwidth=4 ft=raku

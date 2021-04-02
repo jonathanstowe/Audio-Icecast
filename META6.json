@@ -1,6 +1,6 @@
 {
   "name": "Audio::Icecast",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "auth": "github:jonathanstowe",
   "api": "1.0",
   "description": "Administrative helpers for an icecast server",
@@ -9,6 +9,7 @@
     "source": "git://github.com/jonathanstowe/Audio-Icecast.git"
   },
   "perl": "6.*",
+  "raku": "6.*",
   "resources": [
   ],
   "build-depends": [
@@ -35,5 +36,5 @@
   "authors": [
     "Jonathan Stowe <jns+gh@gellyfish.co.uk>"
   ],
-  "meta-version": "0"
+  "meta-version": "1"
 }

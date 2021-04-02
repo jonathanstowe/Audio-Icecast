@@ -2,11 +2,11 @@
 
 Administrative helpers for an icecast server
 
-[![Build Status](https://travis-ci.org/jonathanstowe/Audio-Icecast.svg?branch=master)](https://travis-ci.org/jonathanstowe/Audio-Icecast)
+![Build Status](https://github.com/jonathanstowe/Audio-Icecast/workflows/CI/badge.svg)
 
 ## Synopsis
 
-```perl6
+```raku
 use Audio::Icecast;
 
 # Using the default configuration
@@ -59,12 +59,12 @@ You'll have to take my word for it that I tested against a local
 icecast server with actual sources and clients :)
 
 Anyhow if you have any suggestions or feedback feel free to post them
-at https://github.com/jonathanstowe/Audio-Icecast/issues or even better
+at (github)[https://github.com/jonathanstowe/Audio-Icecast/issues] or even better
 send a pull request.
 
 ## Licence and copyright
 
 This is free software, please see the [LICENCE](LICENCE) file in the distribution.
 
-© Jonathan Stowe 2016, 2017, 2019
+© Jonathan Stowe 2016 - 2021
 

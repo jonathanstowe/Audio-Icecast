@@ -454,4 +454,4 @@ class Audio::Icecast {
         self.get(path => <admin killsource>, params => %(:$mount)).is-success;
     }
 }
-# vim: expandtab shiftwidth=4 ft=perl6
+# vim: expandtab shiftwidth=4 ft=raku
