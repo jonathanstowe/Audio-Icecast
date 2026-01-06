@@ -33,7 +33,7 @@
   "license": "Artistic-2.0",
   "meta-version": "1",
   "provides": {
-    "Audio::Icecast": "lib/Audio/Icecast.pm"
+    "Audio::Icecast": "lib/Audio/Icecast.rakumod"
   },
-  "version": "0.0.5"
+  "version": "0.0.6"
 }
